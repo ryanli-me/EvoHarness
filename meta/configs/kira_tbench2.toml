@@ -1,0 +1,553 @@
+# Meta-Harness optimization config for KIRA on TerminalBench-2
+# 89 tasks, all difficulties
+# NOTE: No resource overrides — matches leaderboard submission requirements
+
+[experiment]
+name = "kira-tbench2"
+harness_root = ".."
+output_dir = "../runs/kira-tbench2"
+max_iterations = 10
+n_trials_search = 1
+n_trials_final = 5
+n_canaries = 5
+regression_tolerance = 1
+model = "anthropic/claude-opus-4-6"
+proposer_model = "anthropic/claude-sonnet-4-6"
+environment = "modal"
+max_episodes = 20
+concurrency = 89
+
+[[cases]]
+task_id = "adaptive-rejection-sampler"
+split = "all"
+difficulty = "medium"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "bn-fit-modify"
+split = "all"
+difficulty = "hard"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "break-filter-js-from-html"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "build-cython-ext"
+split = "all"
+difficulty = "medium"
+stratum = "debugging"
+
+[[cases]]
+task_id = "build-pmars"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "build-pov-ray"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "caffe-cifar-10"
+split = "all"
+difficulty = "medium"
+stratum = "machine-learning"
+
+[[cases]]
+task_id = "cancel-async-tasks"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "chess-best-move"
+split = "all"
+difficulty = "medium"
+stratum = "games"
+
+[[cases]]
+task_id = "circuit-fibsqrt"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "cobol-modernization"
+split = "all"
+difficulty = "easy"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "code-from-image"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "compile-compcert"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "configure-git-webserver"
+split = "all"
+difficulty = "hard"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "constraints-scheduling"
+split = "all"
+difficulty = "medium"
+stratum = "personal-assistant"
+
+[[cases]]
+task_id = "count-dataset-tokens"
+split = "all"
+difficulty = "medium"
+stratum = "model-training"
+
+[[cases]]
+task_id = "crack-7z-hash"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "custom-memory-heap-crash"
+split = "all"
+difficulty = "medium"
+stratum = "debugging"
+
+[[cases]]
+task_id = "db-wal-recovery"
+split = "all"
+difficulty = "medium"
+stratum = "file-operations"
+
+[[cases]]
+task_id = "distribution-search"
+split = "all"
+difficulty = "medium"
+stratum = "machine-learning"
+
+[[cases]]
+task_id = "dna-assembly"
+split = "all"
+difficulty = "hard"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "dna-insert"
+split = "all"
+difficulty = "medium"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "extract-elf"
+split = "all"
+difficulty = "medium"
+stratum = "file-operations"
+
+[[cases]]
+task_id = "extract-moves-from-video"
+split = "all"
+difficulty = "hard"
+stratum = "file-operations"
+
+[[cases]]
+task_id = "feal-differential-cryptanalysis"
+split = "all"
+difficulty = "hard"
+stratum = "mathematics"
+
+[[cases]]
+task_id = "feal-linear-cryptanalysis"
+split = "all"
+difficulty = "hard"
+stratum = "mathematics"
+
+[[cases]]
+task_id = "filter-js-from-html"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "financial-document-processor"
+split = "all"
+difficulty = "medium"
+stratum = "data-processing"
+
+[[cases]]
+task_id = "fix-code-vulnerability"
+split = "all"
+difficulty = "hard"
+stratum = "security"
+
+[[cases]]
+task_id = "fix-git"
+split = "all"
+difficulty = "easy"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "fix-ocaml-gc"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "gcode-to-text"
+split = "all"
+difficulty = "medium"
+stratum = "file-operations"
+
+[[cases]]
+task_id = "git-leak-recovery"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "git-multibranch"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "gpt2-codegolf"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "headless-terminal"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "hf-model-inference"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "install-windows-3.11"
+split = "all"
+difficulty = "hard"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "kv-store-grpc"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "large-scale-text-editing"
+split = "all"
+difficulty = "medium"
+stratum = "file-operations"
+
+[[cases]]
+task_id = "largest-eigenval"
+split = "all"
+difficulty = "medium"
+stratum = "mathematics"
+
+[[cases]]
+task_id = "llm-inference-batching-scheduler"
+split = "all"
+difficulty = "hard"
+stratum = "machine-learning"
+
+[[cases]]
+task_id = "log-summary-date-ranges"
+split = "all"
+difficulty = "medium"
+stratum = "data-processing"
+
+[[cases]]
+task_id = "mailman"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "make-doom-for-mips"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "make-mips-interpreter"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "mcmc-sampling-stan"
+split = "all"
+difficulty = "hard"
+stratum = "data-science"
+
+[[cases]]
+task_id = "merge-diff-arc-agi-task"
+split = "all"
+difficulty = "medium"
+stratum = "debugging"
+
+[[cases]]
+task_id = "model-extraction-relu-logits"
+split = "all"
+difficulty = "hard"
+stratum = "mathematics"
+
+[[cases]]
+task_id = "modernize-scientific-stack"
+split = "all"
+difficulty = "medium"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "mteb-leaderboard"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "mteb-retrieve"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "multi-source-data-merger"
+split = "all"
+difficulty = "medium"
+stratum = "data-processing"
+
+[[cases]]
+task_id = "nginx-request-logging"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "openssl-selfsigned-cert"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "overfull-hbox"
+split = "all"
+difficulty = "easy"
+stratum = "debugging"
+
+[[cases]]
+task_id = "password-recovery"
+split = "all"
+difficulty = "hard"
+stratum = "security"
+
+[[cases]]
+task_id = "path-tracing-reverse"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "path-tracing"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "polyglot-c-py"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "polyglot-rust-c"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "portfolio-optimization"
+split = "all"
+difficulty = "medium"
+stratum = "optimization"
+
+[[cases]]
+task_id = "protein-assembly"
+split = "all"
+difficulty = "hard"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "prove-plus-comm"
+split = "all"
+difficulty = "easy"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "pypi-server"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "pytorch-model-cli"
+split = "all"
+difficulty = "medium"
+stratum = "model-training"
+
+[[cases]]
+task_id = "pytorch-model-recovery"
+split = "all"
+difficulty = "medium"
+stratum = "model-training"
+
+[[cases]]
+task_id = "qemu-alpine-ssh"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "qemu-startup"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "query-optimize"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "raman-fitting"
+split = "all"
+difficulty = "medium"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "regex-chess"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "regex-log"
+split = "all"
+difficulty = "medium"
+stratum = "data-processing"
+
+[[cases]]
+task_id = "reshard-c4-data"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "rstan-to-pystan"
+split = "all"
+difficulty = "medium"
+stratum = "data-science"
+
+[[cases]]
+task_id = "sam-cell-seg"
+split = "all"
+difficulty = "hard"
+stratum = "data-science"
+
+[[cases]]
+task_id = "sanitize-git-repo"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "schemelike-metacircular-eval"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "sparql-university"
+split = "all"
+difficulty = "hard"
+stratum = "data-querying"
+
+[[cases]]
+task_id = "sqlite-db-truncate"
+split = "all"
+difficulty = "medium"
+stratum = "debugging"
+
+[[cases]]
+task_id = "sqlite-with-gcov"
+split = "all"
+difficulty = "medium"
+stratum = "system-administration"
+
+[[cases]]
+task_id = "torch-pipeline-parallelism"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "torch-tensor-parallelism"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "train-fasttext"
+split = "all"
+difficulty = "hard"
+stratum = "model-training"
+
+[[cases]]
+task_id = "tune-mjcf"
+split = "all"
+difficulty = "medium"
+stratum = "scientific-computing"
+
+[[cases]]
+task_id = "video-processing"
+split = "all"
+difficulty = "hard"
+stratum = "video-processing"
+
+[[cases]]
+task_id = "vulnerable-secret"
+split = "all"
+difficulty = "medium"
+stratum = "security"
+
+[[cases]]
+task_id = "winning-avg-corewars"
+split = "all"
+difficulty = "medium"
+stratum = "software-engineering"
+
+[[cases]]
+task_id = "write-compressor"
+split = "all"
+difficulty = "hard"
+stratum = "software-engineering"
+

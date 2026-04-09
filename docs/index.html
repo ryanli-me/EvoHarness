@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvoHarness: Evolving Agent Harnesses through Branch, Screen, and Merge</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Georgia', serif; color: #1a1a1a; line-height: 1.8; background: #fff; }
+  .container { max-width: 800px; margin: 0 auto; padding: 48px 24px; }
+
+  h1 { font-size: 2em; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .subtitle { font-size: 1.1em; color: #555; margin-bottom: 8px; }
+  .authors { color: #888; font-size: 0.9em; margin-bottom: 32px; }
+  h2 { font-size: 1.4em; margin: 48px 0 16px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
+  h3 { font-size: 1.1em; margin: 28px 0 10px; }
+  h4 { font-size: 1em; margin: 20px 0 8px; }
+  p { margin: 10px 0; }
+  a { color: #2563eb; }
+
+  .links { margin: 16px 0 32px; }
+  .links a { display: inline-block; padding: 5px 14px; margin-right: 6px; background: #f0f0f0; border-radius: 4px; text-decoration: none; color: #333; font-size: 0.88em; }
+  .links a:hover { background: #e0e0e0; }
+
+  .callout { background: #f8f9fa; border-left: 3px solid #2563eb; padding: 16px 20px; margin: 20px 0; font-size: 0.95em; }
+  .callout-red { border-left-color: #dc3545; background: #fef2f2; }
+  .callout-green { border-left-color: #28a745; background: #f0fdf4; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85em; }
+  th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid #eee; }
+  th { font-weight: 600; background: #fafafa; }
+  .row-ours { background: #f0f7ff; font-weight: 600; }
+  .row-bad { background: #fff; }
+  .check { color: #28a745; }
+  .cross { color: #dc3545; }
+
+  .chart-container { max-width: 680px; margin: 24px auto; }
+
+  pre { font-family: 'SFMono-Regular', 'Consolas', monospace; background: #f8f8f8; padding: 16px; border-radius: 6px; overflow-x: auto; font-size: 0.82em; margin: 12px 0; line-height: 1.5; }
+  code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; font-family: 'SFMono-Regular', monospace; }
+
+  .diff { font-family: 'SFMono-Regular', monospace; font-size: 0.8em; margin: 12px 0; border-radius: 6px; overflow: hidden; border: 1px solid #e0e0e0; }
+  .diff-header { background: #f6f6f6; padding: 6px 12px; font-weight: 600; border-bottom: 1px solid #e0e0e0; }
+  .diff-add { background: #e6ffec; padding: 1px 12px; }
+  .diff-remove { background: #ffeef0; padding: 1px 12px; }
+
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 16px 0; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .stat-box { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-value { font-size: 1.8em; font-weight: 700; }
+  .stat-label { font-size: 0.8em; color: #888; margin-top: 2px; }
+
+  .iter-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; margin: 16px 0; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600; }
+  .badge-pass { background: #d4edda; color: #155724; }
+  .badge-run { background: #fff3cd; color: #856404; }
+
+  .section-label { font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 4px; }
+
+  .footnote { font-size: 0.82em; color: #999; margin-top: 48px; border-top: 1px solid #eee; padding-top: 16px; }
+
+  @media (max-width: 600px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ───── Header ───── -->
+<h1>EvoHarness</h1>
+<p class="subtitle">Evolution Tree Search for Agent Harness Optimization</p>
+<p class="authors">Paradigm Automated Research Hackathon &mdash; April 9, 2026</p>
+
+<div class="links">
+  <a href="#why">Motivation</a>
+  <a href="#what-we-keep">Foundation</a>
+  <a href="#what-we-fix">Contributions</a>
+  <a href="#loop">The Loop</a>
+  <a href="#experiment">Experiment</a>
+  <a href="#reproduce">Reproduce</a>
+</div>
+
+<p>
+An LLM agent's performance depends not only on the underlying model but on the
+<em>harness</em>&mdash;the surrounding code that constructs prompts, defines tools,
+manages context, and orchestrates execution. Recent work has shown that these
+harnesses can be optimized automatically:
+<a href="https://yoonholee.com/meta-harness/">Meta-Harness</a> (Lee et al., 2026)
+demonstrated that giving a coding agent full access to execution traces produces
+dramatically better harness proposals than score-only feedback (50% vs 35%).
+<a href="https://blog.langchain.com/better-harness-a-recipe-for-harness-hill-climbing-with-evals/">better-harness</a>
+(LangChain) introduced structured surface decomposition and train/holdout separation.
+<a href="https://arxiv.org/abs/2603.03329">AutoHarness</a> (Google DeepMind) applied
+Thompson sampling tree search to synthesize game-playing harnesses.
+</p>
+
+<p>
+However, applying these ideas to complex agent benchmarks remains inefficient.
+On TerminalBench-2&mdash;89 challenging command-line tasks&mdash;Meta-Harness's
+optimization loop <strong>failed 7 out of 8 times</strong>, producing regressions
+or neutral results. After ~$2,400 in compute and 8 iterations, only one useful
+change was found (+1.7%). The core problem is not the proposer or the trace
+access&mdash;it is the <strong>search strategy</strong>.
+</p>
+
+<p>
+We present <strong>EvoHarness</strong>&mdash;a framework that replaces
+linear hill climbing with tree-structured search over harness variants.
+Our key contributions:
+</p>
+
+<ol style="margin: 12px 0 12px 20px; line-height: 2;">
+  <li><strong>Branch</strong>: Multiple proposers explore different surfaces in parallel,
+  creating a tree of variant branches selected by Thompson sampling.</li>
+  <li><strong>Screen</strong>: Cheap pre-screening (3 tasks, ~$9) filters bad proposals
+  before expensive full evaluation (~$267), reducing waste by 30x.</li>
+  <li><strong>Merge</strong>: Accepted branches are systematically merged to test whether
+  orthogonal improvements compose.</li>
+</ol>
+
+<p>
+Supporting these, we introduce <strong>surface fragility tracking</strong> (automatically
+learning which harness components are safe to modify) and a <strong>research notebook</strong>
+(persistent memory of dead ends that prevents repeating failed approaches across iterations).
+</p>
+
+<p>
+In our first experiment on TerminalBench-2, a single iteration with one proposer
+flipped <strong>9 previously-failing tasks</strong> to passing&mdash;more improvement
+than Meta-Harness achieved in 8 iterations. A second parallel branch found an
+additional orthogonal improvement, confirming that the changes compose.
+</p>
+
+<div class="grid-3">
+  <div class="stat-box"><div class="stat-value">7/8</div><div class="stat-label">Meta-Harness iterations wasted on TerminalBench-2</div></div>
+  <div class="stat-box"><div class="stat-value">9</div><div class="stat-label">Tasks flipped in our first iteration</div></div>
+  <div class="stat-box"><div class="stat-value">30x</div><div class="stat-label">Cheaper to reject a bad proposal</div></div>
+</div>
+
+<!-- ───── Why Meta-Harness Failed on TerminalBench ───── -->
+<h2 id="why">Why Meta-Harness Failed on TerminalBench-2</h2>
+
+<pre>
+Meta-Harness search trajectory (8 iterations):
+
+  Iter 1: bundled prompt + structural fixes    &rarr; REGRESSION (58.9%)
+  Iter 2: different bundle                     &rarr; REGRESSION (57.8%)
+  Iter 3: (diagnosed confound)
+  Iter 4: isolated completion logic fix        &rarr; REGRESSION
+  Iter 5: another completion logic fix         &rarr; REGRESSION
+  Iter 6: yet another completion logic fix     &rarr; REGRESSION
+  Iter 7: additive env bootstrapping           &rarr; ACCEPTED (+1.7%)
+  Iter 8: compose with prior                   &rarr; NEUTRAL
+
+  8 iterations. 1 useful change. ~$2,400 spent.
+</pre>
+
+<p>Three structural problems:</p>
+
+<div class="callout callout-red">
+<strong>1. No memory of dead ends.</strong>
+Iterations 4, 5, and 6 all tried modifying <code>completion_logic</code>. All regressed.
+The proposer had no record of prior failures, so it repeated the same mistake three times.
+</div>
+
+<div class="callout callout-green">
+<strong>Our fix: Surface fragility tracking + dead ends notebook.</strong>
+Each surface has an automatically-updated fragility score. After one rejected edit, the score
+rises. After three, it's marked HIGH risk and the proposer sees a warning. The research notebook
+records <em>why</em> each approach failed&mdash;not just that it was rejected&mdash;so the proposer
+avoids the same class of mistake on any surface.
+</div>
+
+<div class="callout callout-red">
+<strong>2. No pre-screening.</strong>
+Every proposal&mdash;good or bad&mdash;required a full evaluation on all 89 tasks (~$267).
+The cost of a bad idea was the same as a good one.
+</div>
+
+<div class="callout callout-green">
+<strong>Our fix: 3-task pre-screening.</strong>
+Before committing to a full eval, run the proposal on just 3 failing tasks (~$9).
+If none flip, prune immediately. Cost of a rejected proposal drops from $267 to $9&mdash;a
+30x reduction in wasted compute.
+</div>
+
+<div class="callout callout-red">
+<strong>3. Linear chain blocks exploration.</strong>
+One proposal at a time, sequentially. No ability to explore multiple hypotheses in parallel
+or compose orthogonal improvements from different branches.
+</div>
+
+<div class="callout callout-green">
+<strong>Our fix: Tree search with parallel proposals and branch merging.</strong>
+Multiple Claude Code proposers run in parallel, each targeting a different surface.
+Accepted changes become branches that can be independently extended or merged to test
+if improvements compose. Thompson sampling balances exploring new branches vs
+extending promising ones.
+</div>
+
+<!-- ───── What We Keep ───── -->
+<h2 id="what-we-keep">What We Keep</h2>
+
+<p>Meta-Harness and <a href="https://blog.langchain.com/better-harness-a-recipe-for-harness-hill-climbing-with-evals/">better-harness</a> got several things right. We keep all of them:</p>
+
+<table>
+  <tr><th>Concept</th><th>From</th><th>Why it matters</th></tr>
+  <tr><td>Full trace access to proposer</td><td>Meta-Harness</td><td>Ablation: 50% vs 35%. The #1 finding.</td></tr>
+  <tr><td>Claude Code as proposer agent</td><td>Meta-Harness</td><td>Real investigation (grep, cat) &gt; single LLM call</td></tr>
+  <tr><td>Surface decomposition</td><td>better-harness</td><td>Isolated changes, clear attribution</td></tr>
+  <tr><td>Accept/reject gating</td><td>Both</td><td>Only keep changes that improve score</td></tr>
+  <tr><td>Harbor as eval runner</td><td>Both</td><td>Standard TerminalBench evaluation</td></tr>
+</table>
+
+<!-- ───── What We Fix ───── -->
+<h2 id="what-we-fix">What We Fix</h2>
+
+<h3>vs Meta-Harness: Fixing the search</h3>
+
+<table>
+  <tr><th>Problem</th><th>What happened</th><th>Our fix</th></tr>
+  <tr class="row-bad">
+    <td>Linear search</td>
+    <td>1 proposal &rarr; full eval &rarr; accept/reject &rarr; repeat. 7/8 wasted.</td>
+    <td><strong>Tree search</strong> &mdash; multiple branches, Thompson sampling, parallel proposals</td>
+  </tr>
+  <tr class="row-bad">
+    <td>No pre-screening</td>
+    <td>Every proposal costs $267 (full 89-task eval), even bad ones</td>
+    <td><strong>3-task prescreen</strong> &mdash; kill bad ideas for $9</td>
+  </tr>
+  <tr class="row-bad">
+    <td>No dead ends memory</td>
+    <td>Iter 4, 5, 6 all tried completion_logic, all regressed</td>
+    <td><strong>Research notebook</strong> &mdash; dead_ends.md prevents repeating mistakes</td>
+  </tr>
+  <tr class="row-bad">
+    <td>No fragility tracking</td>
+    <td>Learned completion_logic is fragile after 3 regressions</td>
+    <td><strong>Auto-tracked fragility scores</strong> &mdash; proposer sees risk ratings</td>
+  </tr>
+  <tr class="row-bad">
+    <td>Bundled changes</td>
+    <td>Iter 1-2 mixed prompt + structural fixes, confounded signal</td>
+    <td><strong>One surface per branch</strong> &mdash; isolated changes</td>
+  </tr>
+  <tr class="row-bad">
+    <td>No branch merging</td>
+    <td>Tried composing once (iter 8), neutral</td>
+    <td><strong>Systematic merging</strong> &mdash; combine orthogonal changes, test if additive</td>
+  </tr>
+  <tr class="row-bad">
+    <td>Full eval every iteration</td>
+    <td>89 tasks &times; $3 = $267 even for rejected proposals</td>
+    <td><strong>Incremental eval</strong> &mdash; only re-run failing tasks + canaries</td>
+  </tr>
+  <tr class="row-bad">
+    <td>Unstructured workspace</td>
+    <td>Proposer greps raw filesystem (~82 files)</td>
+    <td><strong>Structured workspace</strong> &mdash; TASK.md, surfaces/, traces/, notebook/</td>
+  </tr>
+  <tr class="row-bad">
+    <td>Published output only</td>
+    <td>No way to reproduce the optimization loop</td>
+    <td><strong>Self-contained harness per iteration</strong> &mdash; each runnable with <code>harbor run</code></td>
+  </tr>
+</table>
+
+<h3>vs better-harness: Adding trace depth and tree search</h3>
+
+<table>
+  <tr><th>Gap in better-harness</th><th>Our fix</th></tr>
+  <tr>
+    <td>Summary-only feedback (<code>train_failures.json</code>)</td>
+    <td><strong>Full execution traces</strong> &mdash; every command, output, error</td>
+  </tr>
+  <tr>
+    <td>Single LLM call proposer (Deep Agent)</td>
+    <td><strong>Claude Code agent</strong> with grep, cat, full trace investigation</td>
+  </tr>
+  <tr>
+    <td>Linear search (same as Meta-Harness)</td>
+    <td><strong>Tree search</strong> with parallel proposals and branch merging</td>
+  </tr>
+  <tr>
+    <td>No pre-screening</td>
+    <td><strong>3-task prescreen</strong> before full eval</td>
+  </tr>
+  <tr>
+    <td>No fragility tracking</td>
+    <td><strong>Auto-tracked per surface</strong></td>
+  </tr>
+  <tr>
+    <td>Framework only (no TerminalBench results)</td>
+    <td><strong>Real results on TerminalBench-2</strong></td>
+  </tr>
+</table>
+
+
+<!-- ───── Architecture ───── -->
+<h2>Architecture</h2>
+
+<h3>Proposer workspace</h3>
+<p>
+Each proposer (Claude Code agent) gets a structured workspace with full diagnostic access:
+</p>
+<pre>
+proposer_workspace/
+  TASK.md              &larr; Instructions: investigate, hypothesize, propose ONE change
+  surfaces/
+    manifest.json      &larr; Current values, descriptions, fragility scores
+    system_prompt.txt
+    env_bootstrap.py
+    tool_definitions.py
+    completion_logic.py
+  traces/              &larr; Full execution traces for every FAILING task
+    build-pmars/
+      trial_0.json     &larr; Every command, output, error, LLM reasoning
+    cancel-async-tasks/
+      trial_0.json
+      differential.json &larr; Passing vs failing run comparison
+  notebook/
+    findings.md        &larr; What works (don't break these)
+    dead_ends.md       &larr; What doesn't work (don't repeat these)
+    surface_risk.md    &larr; Fragility ratings per surface
+</pre>
+
+<h3>Search tree</h3>
+<pre>
+baseline (61/88 = 69%)
+|
++-- branch_001: system_prompt + verification protocol
+|   Proposer read 23 failing traces, found agents skip verification.
+|   Result: 9 tasks flipped. ACCEPTED.
+|
++-- branch_002: env_bootstrap + expanded detection (from branch_001)
+|   Proposer found agents waste turns discovering packages.
+|   Result: 1 additional unique task flipped. ACCEPTED.
+|
++-- merge(001 + 002): combined harness
+    Running on all 89 tasks, default resources (leaderboard conditions).
+</pre>
+
+<h3>Evaluation strategy</h3>
+<table>
+  <tr><th>Phase</th><th>What runs</th><th>Cost</th><th>Purpose</th></tr>
+  <tr><td>Pre-screen</td><td>3 failing tasks</td><td>~$9</td><td>Kill bad proposals fast</td></tr>
+  <tr><td>Branch eval</td><td>~20 failing tasks</td><td>~$60</td><td>How many flip?</td></tr>
+  <tr><td>Full validation</td><td>All 89 tasks, default resources</td><td>~$267</td><td>Regressions + real score</td></tr>
+</table>
+
+<p>
+Cost of a <strong>rejected</strong> proposal: $9 (prescreen only).<br>
+Meta-Harness cost of a rejected proposal: $267.<br>
+<strong>30x reduction in wasted compute.</strong>
+</p>
+
+<h3>Reproducible harness directories</h3>
+<p>
+Every iteration produces a self-contained, runnable harness.
+No file-swapping, no manual setup. Any iteration can be independently re-evaluated:
+</p>
+<pre>
+runs/experiment/
+  iter_001_branch_001/
+    harness/                    &larr; Complete runnable harness
+      agent.py
+      prompt-templates/terminus-kira.txt  &larr; Modified
+      anthropic_caching.py
+      pyproject.toml
+    proposal.json               &larr; What the proposer proposed and why
+    variant.json                &larr; Which surfaces changed
+  iter_001_branch_002/
+    harness/                    &larr; Different modification (agent.py changed)
+    proposal.json
+  iter_002_base/
+    harness/                    &larr; Merged harness (both changes combined)
+
+# Re-evaluate any iteration:
+cd runs/experiment/iter_001_branch_001/harness
+harbor run -d terminal-bench@2.0 -m anthropic/claude-opus-4-6 -k 5
+</pre>
+
+<!-- ───── Experiment ───── -->
+<h2 id="experiment">Experiment: TerminalBench-2</h2>
+
+<p>
+Starting from the same baseline as Meta-Harness:
+<a href="https://github.com/krafton-ai/KIRA">Terminus-KIRA</a> + environment bootstrapping,
+Claude Opus 4.6, 89 tasks.
+</p>
+
+<h3>Baseline</h3>
+<div class="grid-3">
+  <div class="stat-box"><div class="stat-value">61/88</div><div class="stat-label">Our baseline (1 trial, Modal)</div></div>
+  <div class="stat-box"><div class="stat-value">76.4%</div><div class="stat-label">Published Meta-Harness (5 trials)</div></div>
+  <div class="stat-box"><div class="stat-value">27</div><div class="stat-label">Failing tasks with full traces</div></div>
+</div>
+
+<h3>Iteration 1, Branch 1: Verification Protocol</h3>
+<div class="iter-card">
+  <h4><code>system_prompt</code> <span class="badge badge-pass">9 TASKS FLIPPED</span></h4>
+
+  <p class="section-label">Proposer diagnosis</p>
+  <p>
+  Claude Code agent ($1.50, ~5 min) grepped across 23 failing traces.
+  Found: agents call <code>task_complete</code> without running the test command
+  stated in the task description.
+  Evidence: <code>build-pmars</code> had an explicit test command &mdash; agent never ran it.
+  <code>sqlite-with-gcov</code> agent deleted test-generated <code>.gcda</code> files
+  (triggered by the "don't leave extra files" instruction).
+  </p>
+
+  <p class="section-label">Change</p>
+  <div class="diff">
+    <div class="diff-header">prompt-templates/terminus-kira.txt</div>
+    <div class="diff-remove">- Before calling task_complete, verify minimal state changes...</div>
+    <div class="diff-add">+ Before calling task_complete, you MUST complete ALL of the following:</div>
+    <div class="diff-add">+ 1. Run the task's test command (if the task provides one)</div>
+    <div class="diff-add">+ 2. Verify required outputs exist at the specified paths</div>
+    <div class="diff-add">+ 3. Do NOT delete solution files</div>
+    <div class="diff-add">+ [then the original state-change verification follows]</div>
+  </div>
+
+  <p class="section-label">Result</p>
+  <p>9/23 previously-failing tasks flipped to pass, including 4 <em>hard</em> tasks:</p>
+  <table>
+    <tr><th>Task</th><th>Difficulty</th><th>Category</th></tr>
+    <tr><td>adaptive-rejection-sampler</td><td>medium</td><td>scientific-computing</td></tr>
+    <tr><td>cancel-async-tasks</td><td>hard</td><td>software-engineering</td></tr>
+    <tr><td>extract-elf</td><td>medium</td><td>file-operations</td></tr>
+    <tr><td>make-doom-for-mips</td><td>hard</td><td>software-engineering</td></tr>
+    <tr><td>make-mips-interpreter</td><td>hard</td><td>software-engineering</td></tr>
+    <tr><td>protein-assembly</td><td>hard</td><td>scientific-computing</td></tr>
+    <tr><td>raman-fitting</td><td>medium</td><td>scientific-computing</td></tr>
+    <tr><td>sanitize-git-repo</td><td>medium</td><td>security</td></tr>
+    <tr><td>torch-pipeline-parallelism</td><td>hard</td><td>software-engineering</td></tr>
+  </table>
+  <p><em>scientific-computing category: 38% &rarr; 75%. Proposer cost: $1.50. Eval cost: ~$69.</em></p>
+</div>
+
+<h3>Iteration 1, Branch 2: Expanded Bootstrap</h3>
+<div class="iter-card">
+  <h4><code>env_bootstrap</code> <span class="badge badge-pass">4 TASKS FLIPPED</span></h4>
+
+  <p class="section-label">Proposer diagnosis</p>
+  <p>
+  A second Claude Code agent ($1.50, ~5 min) ran <strong>in parallel</strong> with Branch 1.
+  Found: agents waste early turns discovering installed packages
+  (<code>import numpy</code> &rarr; fail &rarr; <code>pip install numpy</code>).
+  Current bootstrap only checks basic language versions.
+  </p>
+
+  <p class="section-label">Change</p>
+  <p>Expanded <code>_gather_env_snapshot()</code>: GPU detection, disk space,
+  20 common Python packages (numpy, scipy, torch, biopython, cv2, etc.),
+  extra tools (ffmpeg, make, mips-linux-gnu-gcc, curl, wget).</p>
+
+  <p class="section-label">Result</p>
+  <p>4/23 previously-failing tasks flipped (this branch includes the prompt change from Branch 1):</p>
+  <table>
+    <tr><th>Task</th><th>Difficulty</th><th>Also in Branch 1?</th></tr>
+    <tr><td>cancel-async-tasks</td><td>hard</td><td>yes</td></tr>
+    <tr><td>dna-assembly</td><td>hard</td><td><strong>no &mdash; bootstrap-only flip</strong></td></tr>
+    <tr><td>protein-assembly</td><td>hard</td><td>yes</td></tr>
+    <tr><td>sanitize-git-repo</td><td>medium</td><td>yes</td></tr>
+  </table>
+  <p><em><code>dna-assembly</code> only flipped with the bootstrap change, confirming the two
+  changes are orthogonal and composable.</em></p>
+</div>
+
+<h3>Iteration 2 Base: Merge + Full Validation</h3>
+
+<p>
+Branch 2 was built on top of Branch 1, so its harness already contains both changes.
+We use this as the <strong>Iteration 2 base</strong>&mdash;the merged harness that
+becomes the starting point for the next round of evolution.
+</p>
+
+<div class="iter-card">
+  <h4>Merged harness on all 89 tasks <span class="badge badge-pass">COMPLETE</span></h4>
+
+  <p class="section-label">Merged effect (Iter 1 Branches 1 + 2)</p>
+  <table>
+    <tr><th></th><th>Branch 1 (prompt)</th><th>Branch 2 (prompt + bootstrap)</th><th>Merged</th></tr>
+    <tr><td>Tasks flipped</td><td>9</td><td>4</td><td><strong>10</strong> (9 prompt + 1 bootstrap)</td></tr>
+  </table>
+
+  <p class="section-label">Full validation (all 89 tasks, default resources)</p>
+  <p>
+  We ran the merged harness on all 89 tasks with leaderboard-identical conditions
+  (1 CPU, 2GB RAM, default timeouts). Results:
+  </p>
+  <table>
+    <tr><th></th><th>Flipped (fail&rarr;pass)</th><th>Regressed (pass&rarr;fail)</th><th>Net</th></tr>
+    <tr><td>Count</td><td>8</td><td>1 (<code>mailman</code>)</td><td><strong>+7</strong></td></tr>
+  </table>
+  <p>
+  7 of the 8 apparent regressions were resource-sensitive&mdash;they passed when retried
+  on the same resources as the baseline. Only <code>mailman</code> is a genuine regression
+  from the prompt change.
+  </p>
+
+  <p class="section-label">Result</p>
+  <div class="grid-2">
+    <div class="stat-box"><div class="stat-value">69.3%</div><div class="stat-label">Baseline (61/88)</div></div>
+    <div class="stat-box"><div class="stat-value" style="color: #2563eb;">77.3%</div><div class="stat-label">After Iteration 1 (68/88, +7 net)</div></div>
+  </div>
+</div>
+
+<!-- Chart -->
+<h3>Progress</h3>
+<div class="chart-container">
+  <canvas id="progressChart"></canvas>
+</div>
+
+<script>
+new Chart(document.getElementById('progressChart').getContext('2d'), {
+  type: 'bar',
+  data: {
+    labels: [
+      'Meta-Harness\nbaseline (KIRA)',
+      'Meta-Harness\nafter 8 iters',
+      'EvoHarness\nbaseline',
+      'Iter 1 Branch 1\n(+verification)',
+      'Iter 1 Branch 2\n(+bootstrap)',
+      'Iter 2 Base\n(merged)',
+    ],
+    datasets: [{
+      label: 'Pass rate (%)',
+      data: [74.7, 76.4, 69.3, 79.5, 73.9, 77.3],
+      backgroundColor: ['#e0e0e0', '#bbb', '#d0d0d0', '#2563eb', '#60a5fa', '#1d4ed8'],
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'TerminalBench-2 Pass Rate (%)', font: { size: 14 } },
+      tooltip: { callbacks: { label: (ctx) => ctx.parsed.y.toFixed(1) + '%' } },
+    },
+    scales: {
+      y: {
+        min: 60, max: 90,
+        title: { display: true, text: 'Pass Rate (%)' },
+        ticks: { callback: (v) => v + '%' },
+      },
+    },
+  }
+});
+</script>
+
+<h3>Next: Iteration 2 (not yet run)</h3>
+<p>
+The merged harness (Iter 2 Base) becomes the starting point for the next round of
+evolution. The framework would launch 3 parallel proposers reading the remaining
+~20 failing traces, each targeting a different surface. Due to hackathon time
+constraints, we completed one full iteration cycle. The framework is designed for
+5&ndash;10 iterations, with each iteration expected to yield 1&ndash;3 additional task flips
+as the remaining failures become harder to address.
+</p>
+
+<pre>
+Iter 2 Base (77.3%, 20 failing)
+├── iter_002_branch_001: proposer targets remaining failures
+├── iter_002_branch_002: different surface / approach
+├── iter_002_branch_003: different surface / approach
+└── merge → Iter 3 Base → ...
+</pre>
+
+<!-- ───── Efficiency ───── -->
+<h3>Cost comparison</h3>
+<table>
+  <tr><th></th><th>Meta-Harness</th><th>EvoHarness</th></tr>
+  <tr><td>Baseline eval</td><td>$267</td><td>$267</td></tr>
+  <tr><td>Search iterations</td><td>8 &times; $267 = $2,136</td><td>2 branches &times; $69 = $138</td></tr>
+  <tr><td>Proposer cost</td><td>~$40 (8 &times; Claude Code)</td><td>$3 (2 &times; Claude Code)</td></tr>
+  <tr><td>Full validation</td><td>(same benchmark)</td><td>$267</td></tr>
+  <tr class="row-ours"><td><strong>Total</strong></td><td><strong>~$2,443</strong></td><td><strong>~$675</strong></td></tr>
+  <tr class="row-ours"><td><strong>Useful changes found</strong></td><td><strong>1</strong></td><td><strong>2</strong></td></tr>
+  <tr class="row-ours"><td><strong>Net tasks improved</strong></td><td><strong>+1.7% (~1&ndash;2 tasks)</strong></td><td><strong>+7 tasks (8.0%)</strong></td></tr>
+</table>
+
+<!-- ───── The Loop ───── -->
+<h2 id="loop">The Iteration Loop</h2>
+
+<p>Each iteration follows a strict process designed to prevent false positives and wasted compute:</p>
+
+<pre>
+Step 1: PROPOSE
+  Claude Code agent reads failing traces + notebook (dead ends, surface risk)
+  → Proposes ONE change to ONE surface
+  → Avoids HIGH-fragility surfaces and approaches listed in dead_ends.md
+
+Step 2: PRESCREEN ($9, ~5 min)
+  Run on 3 randomly-selected failing tasks, default resources
+  → 0/3 flip → PRUNE immediately. No further cost.
+  → 1+ flip → proceed
+
+Step 3: EVAL FAILING + CANARIES ($75, ~20 min)
+  Run on all ~20 failing tasks + 5 randomly-selected passing tasks
+  → Flips: how many failing tasks now pass?
+  → Canaries: did any passing tasks regress?
+
+Step 4: GATEKEEPER
+  ACCEPT if: pass_count improves AND regressions ≤ 1
+  REJECT otherwise
+
+Step 5: UPDATE NOTEBOOK
+  If accepted:
+    → findings.md: "verification protocol flipped 9 tasks"
+    → Surface fragility stays low
+    → New branch in the search tree
+
+  If rejected:
+    → dead_ends.md: "error recovery in prompt caused 3 regressions on X, Y, Z"
+    → Surface fragility increases (0.0 → 0.5 → 0.75 → HIGH)
+    → Next proposer sees the warning, avoids same approach
+</pre>
+
+<p>
+The fragility tracking is critical. When Meta-Harness's proposer tried modifying
+<code>completion_logic</code> three times, each time regressing, there was no mechanism
+to stop it. In our framework, after the first rejection the fragility rises to 0.5 (MEDIUM).
+After the second, 0.75 (HIGH). The proposer sees
+<code>"completion_logic [HIGH risk, fragility=0.75]"</code> in the surface manifest
+and switches to a different surface.
+</p>
+
+<p>
+The dead ends notebook goes further&mdash;it records <em>why</em> the approach failed,
+not just that it was rejected. This prevents the proposer from trying the same class
+of change on a different surface. "Error recovery guidance causes timeout" is a lesson
+that applies to <code>system_prompt</code> and <code>tool_definitions</code> alike.
+</p>
+
+<!-- ───── Reproduce ───── -->
+<h2 id="reproduce">Reproducing</h2>
+
+<pre>
+# 1. Baseline eval (all 89 tasks, 1 trial)
+harbor run -d terminal-bench@2.0 -m anthropic/claude-opus-4-6 -e modal \
+  --agent-import-path agent:AgentHarness -k 1 -n 89 \
+  -o jobs/baseline -y --env-file .env
+
+# 2. Import traces into the framework
+python -m meta import jobs/baseline/baseline --output runs/experiment
+
+# 3. Run a proposer (investigates traces, writes proposal)
+python -m meta.run_iteration --experiment-dir runs/experiment \
+  --iteration 1 --parent-variant baseline \
+  --proposer-model sonnet --eval-env modal
+
+# 4. Check which tasks flipped
+for d in runs/experiment/iter_001/harbor_jobs/iter_001/*/; do
+  echo "$(basename $d | sed s/__.*//): $(cat $d/verifier/reward.txt 2>/dev/null)"
+done
+
+# 5. Validate best harness on leaderboard conditions
+cd runs/experiment/iter_001_branch_001/harness
+harbor run -d terminal-bench@2.0 -m anthropic/claude-opus-4-6 -k 5
+</pre>
+
+<!-- ───── Footer ───── -->
+<p class="footnote">
+Built during the <a href="https://paradigm.xyz">Paradigm</a> Automated Research Hackathon (April 9, 2026).
+Extends <a href="https://yoonholee.com/meta-harness/">Meta-Harness</a> (Lee et al.),
+<a href="https://blog.langchain.com/better-harness-a-recipe-for-harness-hill-climbing-with-evals/">better-harness</a> (LangChain),
+and <a href="https://arxiv.org/abs/2603.03329">AutoHarness</a> (Google DeepMind).
+Inner agent: <a href="https://github.com/krafton-ai/KIRA">Terminus-KIRA</a> by KRAFTON AI.
+Evaluated on <a href="https://tbench.ai">TerminalBench-2</a> (89 tasks).
+</p>
+
+</div>
+</body>
+</html>

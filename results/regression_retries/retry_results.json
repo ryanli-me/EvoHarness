@@ -1,0 +1,10 @@
+{
+  "count-dataset-tokens": 1.0,
+  "crack-7z-hash": 1.0,
+  "gcode-to-text": 1.0,
+  "mailman": 0.0,
+  "merge-diff-arc-agi-task": 1.0,
+  "qemu-startup": 1.0,
+  "tune-mjcf": 1.0,
+  "write-compressor": 1.0
+}

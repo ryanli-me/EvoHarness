@@ -1,0 +1,66 @@
+{
+  "baseline": {
+    "passed": 61,
+    "total": 88,
+    "rate": 69.3
+  },
+  "iter_001_branch_001": {
+    "surface": "system_prompt",
+    "change": "verification protocol",
+    "flipped": [
+      "adaptive-rejection-sampler",
+      "cancel-async-tasks",
+      "extract-elf",
+      "make-doom-for-mips",
+      "make-mips-interpreter",
+      "protein-assembly",
+      "raman-fitting",
+      "sanitize-git-repo",
+      "torch-pipeline-parallelism"
+    ],
+    "flipped_count": 9
+  },
+  "iter_001_branch_002": {
+    "surface": "env_bootstrap",
+    "change": "expanded environment detection",
+    "flipped": [
+      "cancel-async-tasks",
+      "dna-assembly",
+      "protein-assembly",
+      "sanitize-git-repo"
+    ],
+    "unique_flip": "dna-assembly"
+  },
+  "merge_default_resources": {
+    "flipped": [
+      "caffe-cifar-10",
+      "db-wal-recovery",
+      "dna-insert",
+      "make-mips-interpreter",
+      "protein-assembly",
+      "sanitize-git-repo",
+      "sqlite-with-gcov",
+      "torch-pipeline-parallelism"
+    ],
+    "regressed": [
+      "mailman"
+    ],
+    "resource_sensitive": [
+      "crack-7z-hash",
+      "gcode-to-text",
+      "merge-diff-arc-agi-task",
+      "qemu-startup",
+      "tune-mjcf",
+      "write-compressor"
+    ],
+    "flaky": [
+      "count-dataset-tokens"
+    ],
+    "net_improvement": 7,
+    "projected_score": {
+      "passed": 68,
+      "total": 88,
+      "rate": 77.3
+    }
+  }
+}

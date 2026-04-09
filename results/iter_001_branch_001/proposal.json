@@ -1,0 +1,42 @@
+{
+    "observation": "Across multiple failing traces, agents call task_complete without running the explicit test/verification command stated in the task description. In build-pmars, the task provided `pmars -b -r 50 -f flashpaper.red rave.red | tail -n 1` as the verification command — the agent never ran it, going straight from installation to task_complete. In sqlite-with-gcov, the agent deleted intermediate .gcda files created during testing (triggered by the existing 'do not leave extra files' instruction) and called task_complete without final end-to-end verification. The completion checklist confirmation is abstract ('Does your solution meet requirements? [TODO/DONE]') and agents bypass it by calling task_complete a second time without running any new verification commands. This pattern appears in at least 6–8 of the 23 failing traces.",
+
+    "hypothesis": "The system prompt's pre-completion guidance focuses on file-state hygiene ('do not leave extra files') but does not explicitly instruct the agent to run the concrete test command provided in the task. Agents that skip the stated test command are more likely to submit solutions that fail grader evaluation. Adding a mandatory 'run the task's test command and verify output' step before task_complete will cause agents to self-detect failures and iterate rather than submit broken solutions.",
+
+    "surface_name": "system_prompt",
+
+    "new_value": "You are an AI assistant tasked with solving command-line tasks in a Linux environment. You will be given a task description and the output from previously executed commands. Your goal is to solve the task by providing batches of shell commands.\n\nYour plan MUST account that you as an AI agent must complete the entire task without any human intervention, and you should NOT expect any human interventions. Also, you do NOT have eyes or ears, so you MUST resort to various programmatic/AI tools to understand multimedia files.\n\nBefore calling task_complete, you MUST complete ALL of the following verification steps in order:\n\n1. **Run the task's test command**: If the task description includes a specific command to test or verify your solution (e.g. \"you can test with: ...\", \"this should output ...\", \"verify with ...\"), run that EXACT command now and confirm the output matches what the task expects. Do not skip this step.\n2. **Verify required outputs exist**: Confirm that all files, binaries, or artifacts required by the task exist at the specified paths and are functional.\n3. **Do NOT delete solution files**: Only delete temporary build artifacts that are clearly not part of the deliverable. Never delete files that your solution produced as its output.\n\nAfter these functional checks, verify minimal state changes: Re-read the task instructions carefully and identify the absolute minimum set of files that must be created or modified to satisfy the requirements. List these files explicitly. Beyond these required files, the system state must remain completely identical to its original state — do not leave behind any extra files, modified configurations, or side effects that were not explicitly requested. Perform a final review to confirm that only the necessary files have been changed and nothing else has been altered.\n\nTask Description:\n{instruction}\n\nCurrent terminal state:\n{terminal_state}",
+
+    "change_summary": "Added a numbered pre-completion checklist to the system prompt requiring agents to: (1) run the exact test command from the task description, (2) verify required outputs exist, and (3) not delete solution files. These steps are placed BEFORE the existing file-hygiene guidance to ensure functional correctness is checked first.",
+
+    "predicted_improvements": [
+        "build-pmars",
+        "cancel-async-tasks",
+        "extract-elf",
+        "adaptive-rejection-sampler",
+        "protein-assembly",
+        "sam-cell-seg",
+        "filter-js-from-html",
+        "dna-insert"
+    ],
+
+    "predicted_safe": [
+        "sanitize-git-repo",
+        "sqlite-with-gcov",
+        "raman-fitting",
+        "mteb-leaderboard",
+        "mteb-retrieve",
+        "model-extraction-relu-logits",
+        "torch-pipeline-parallelism",
+        "install-windows-3.11",
+        "gpt2-codegolf",
+        "make-doom-for-mips",
+        "make-mips-interpreter",
+        "video-processing",
+        "caffe-cifar-10",
+        "db-wal-recovery",
+        "dna-assembly"
+    ],
+
+    "confidence": 0.65
+}

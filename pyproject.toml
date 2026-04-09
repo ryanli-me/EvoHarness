@@ -1,0 +1,14 @@
+[project]
+name = "meta-harness"
+version = "2.0.0"
+description = "Meta-Harness: Automated harness optimization framework for Terminal-Bench 2.0"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic",
+    "harbor>=0.1.44",
+    "litellm<1.82.7",
+    "tenacity",
+]
+
+[project.scripts]
+meta-harness = "meta.__main__:main"

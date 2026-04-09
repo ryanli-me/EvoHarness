@@ -1,0 +1,6 @@
+.env
+runs/
+jobs/
+__pycache__/
+.venv/
+*.pyc
